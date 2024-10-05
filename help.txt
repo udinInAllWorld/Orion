@@ -1,0 +1,12 @@
+pastikan lakukan remot ini untuk pilih akun:
+
+git remote set-url origin git@github.com:udinInAllWorld/your-repo-name.git
+git remote set-url origin git@github-Enzo:Enzo-YTscript/your-repository-name.git
+
+ini unutk cek lagi remote di akun apa:
+git remote -v
+
+setelah itu boleh :
+git add .
+git commit -m "Your commit message"
+git push origin main
