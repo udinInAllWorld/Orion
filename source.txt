@@ -1723,7 +1723,7 @@ local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
 local keyLink = "https://pastebin.com/raw/9n5jBW7v"
 
 -- Fungsi untuk mengecek apakah key sudah kadaluarsa
-local function IsKeyExpired()
+function IsKeyExpired()
     if LastKeyTime == nil then
         return true
     end
@@ -1732,18 +1732,18 @@ local function IsKeyExpired()
 end
 
 -- Fungsi untuk menyimpan waktu penggunaan key
-local function SaveKeyTime()
+function SaveKeyTime()
     LastKeyTime = os.time()
 end
 
 -- Fungsi untuk validasi key
-local function ValidateKey(inputKey)
+function ValidateKey(inputKey)
     local success, response = pcall(function()
         return HttpService:GetAsync(keyLink)
     end)
     if success then
         -- Jika key cocok, simpan waktu penggunaan
-        if response:match(inputKey) then
+        if response:find(inputKey) then
             SaveKeyTime()
             return true
         else
@@ -1756,7 +1756,7 @@ local function ValidateKey(inputKey)
 end
 
 -- Fungsi untuk mengecek status key (valid atau kadaluarsa)
-local function CheckKey(inputKey)
+function CheckKey(inputKey)
     if IsKeyExpired() then
         return false, "Key expired. Please enter a new key."
     elseif ValidateKey(inputKey) then
@@ -1767,7 +1767,7 @@ local function CheckKey(inputKey)
 end
 
 -- Fungsi untuk memastikan fitur disembunyikan jika key tidak valid
-local function ShouldHideFeatures()
+function ShouldHideFeatures()
     return LastKeyTime == nil or IsKeyExpired()
 end
 
