@@ -1722,16 +1722,20 @@ local keyVerifiedTime = nil
 local function SaveKeyStatus(time)
     verifiedKey = true
     keyVerifiedTime = time
-    -- Simpan ke file untuk persistensi
-    writefile(OrionLib.Folder .. "/key_status.txt", tostring(time))
+    local keyData = {
+        Verified = true,
+        Time = time
+    }
+    writefile("OrionKeySystem/key_status.txt", game:GetService("HttpService"):JSONEncode(keyData))
 end
 
 -- Fungsi untuk memuat status verifikasi
 local function LoadKeyStatus()
-    if isfile(OrionLib.Folder .. "/key_status.txt") then
-        local savedTime = tonumber(readfile(OrionLib.Folder .. "/key_status.txt"))
-        if savedTime then
-            keyVerifiedTime = savedTime
+    if isfile("OrionKeySystem/key_status.txt") then
+        local data = readfile("OrionKeySystem/key_status.txt")
+        local keyData = game:GetService("HttpService"):JSONDecode(data)
+        if keyData and keyData.Verified and keyData.Time then
+            keyVerifiedTime = keyData.Time
             if os.time() - keyVerifiedTime < keyDuration then
                 verifiedKey = true
             else
@@ -1753,17 +1757,18 @@ end
 -- Load status verifikasi saat script dijalankan
 LoadKeyStatus()
 
--- Fungsi untuk menyembunyikan semua tab kecuali tab key
-local function HideAllTabsExceptKey(Window)
-    for _, tab in pairs(Window:GetTabs()) do
+-- Fungsi untuk mengatur visibilitas tab berdasarkan status key
+local function SetTabVisibility(tabs)
+    for _, tab in pairs(tabs) do
         if tab.Name ~= "Key" then
-            tab:SetVisibility(false)
+            if IsKeyValid() then
+                tab:SetVisibility(true)
+            else
+                tab:SetVisibility(false)
+            end
         end
     end
 end
-
--- Memanggil fungsi untuk menyembunyikan tab saat script dijalankan
-HideAllTabsExceptKey(OrionLib)
 
 
 -- [Bagian lain dari skrip yang diperlukan]
