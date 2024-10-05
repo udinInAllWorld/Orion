@@ -1717,9 +1717,9 @@ local HttpService = game:GetService("HttpService")
 
 -- URL untuk key yang valid
 local KeyURL = "https://pastebin.com/raw/9n5jBW7v"
-local ValidKey = nil
 local LastKeyTime = nil
 local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
+local ValidKey = nil
 
 -- Fungsi untuk mendapatkan key dari URL
 function GetValidKey()
@@ -1772,11 +1772,6 @@ function CheckKey(inputKey)
     else
         return false, "Wrong Key! Try again."
     end
-end
-
--- Fungsi untuk memastikan fitur disembunyikan jika key tidak valid
-function ShouldHideFeatures()
-    return LastKeyTime == nil or IsKeyExpired()
 end
 
 
