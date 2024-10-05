@@ -1732,7 +1732,7 @@ function GetValidKey()
         print("Valid Key Retrieved: ", ValidKey) -- Debugging untuk melihat key yang didapat
         return ValidKey
     else
-        warn("Tidak dapat mengambil key: " .. tostring(response))
+        warn("Tidak dapat mengambil key dari server: " .. tostring(response))
         ValidKey = nil
         return nil
     end
@@ -1743,7 +1743,8 @@ function ValidateKey(inputKey)
     if not ValidKey then
         ValidKey = GetValidKey()
         if not ValidKey then
-            return false, "Unable to retrieve key from server. Please try again later." -- Jika key tidak berhasil diambil, tidak dapat memvalidasi
+            warn("Unable to retrieve key for validation.") -- Debugging jika gagal mengambil key
+            return false, "Unable to retrieve key from server. Please try again later."
         end
     end
 
@@ -1752,7 +1753,7 @@ function ValidateKey(inputKey)
         print("Key Validated Successfully") -- Debugging untuk memastikan key valid
         return true, "Correct Key! Features Unlocked!"
     else
-        print("Invalid Key Entered") -- Debugging untuk key yang salah
+        print("Invalid Key Entered: ", inputKey) -- Debugging untuk key yang salah
         return false, "Wrong Key! Please try again."
     end
 end
