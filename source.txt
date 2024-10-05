@@ -1710,6 +1710,63 @@ function OrionLib:MakeWindow(WindowConfig)
 		end
 		return ElementFunction   
 	end  
+
+-- [Bagian library Orion dan fungsi lainnya]
+
+-- Variabel untuk menyimpan waktu key terakhir digunakan
+local LastKeyTime = nil
+local keyDuration = 120 -- 24 jam dalam detik
+
+-- URL untuk key yang valid
+local keyLink = "https://pastebin.com/raw/9n5jBW7v"
+local HttpService = game:GetService("HttpService")
+
+-- Fungsi untuk mengecek apakah key sudah kadaluarsa
+local function IsKeyExpired()
+    if LastKeyTime == nil then
+        return true
+    end
+    -- Mengecek apakah sudah lebih dari 24 jam
+    return (os.time() - LastKeyTime) > KeyExpiration
+end
+
+-- Fungsi untuk menyimpan waktu penggunaan key
+local function SaveKeyTime()
+    LastKeyTime = os.time()
+end
+
+-- Fungsi untuk validasi key
+local function ValidateKey(inputKey)
+    local success, response = pcall(function()
+        return HttpService:GetAsync(keyLink)
+    end)
+    if success then
+        -- Jika key cocok, simpan waktu penggunaan
+        if response:match(inputKey) then
+            SaveKeyTime()
+            return true
+        else
+            return false
+        end
+    else
+        warn("Gagal mengambil key dari pastebin: " .. response)
+        return false
+    end
+end
+
+-- Fungsi untuk mengecek status key (valid atau kadaluarsa)
+local function CheckKey(inputKey)
+    if IsKeyExpired() then
+        return false, "Key expired. Please enter a new key."
+    elseif ValidateKey(inputKey) then
+        return true, "Correct Key! Features Unlocked!"
+    else
+        return false, "Wrong Key! Try again."
+    end
+end
+
+-- [Bagian lain dari skrip yang diperlukan]
+
 	
 	--if writefile and isfile then
 	--	if not isfile("NewLibraryNotification1.txt") then
