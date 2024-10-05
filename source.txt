@@ -1752,7 +1752,6 @@ function CheckKey(inputKey)
     end
 end
 
-
 -- [Bagian lain dari skrip yang diperlukan]
 
 	
