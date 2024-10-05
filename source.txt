@@ -1713,56 +1713,38 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Durasi validitas key dalam detik
-local keyDuration = 86400  -- 24 jam dalam detik (24 jam)
-local verifiedKey = false
-local keyVerifiedTime = nil
+-- Menambahkan fungsi untuk mengatur validasi key dan masa berlaku key 24 jam
+local HttpService = game:GetService("HttpService")
+local keyLink = "https://pastebin.com/raw/9n5jBW7v"
+local validKey = nil
+local keyLastChecked = 0
+local keyDuration = 120 -- 24 jam dalam detik
 
--- Fungsi untuk menyimpan status verifikasi
-local function SaveKeyStatus(time)
-    verifiedKey = true
-    keyVerifiedTime = time
-    local keyData = {
-        Verified = true,
-        Time = time
-    }
-    -- Simpan status key ke file untuk persistensi
-    writefile("OrionKeySystem/key_status.txt", game:GetService("HttpService"):JSONEncode(keyData))
-end
-
--- Fungsi untuk memuat status verifikasi
-local function LoadKeyStatus()
-    if isfile("OrionKeySystem/key_status.txt") then
-        local data = readfile("OrionKeySystem/key_status.txt")
-        local keyData = game:GetService("HttpService"):JSONDecode(data)
-        if keyData and keyData.Verified and keyData.Time then
-            keyVerifiedTime = keyData.Time
-            -- Cek apakah key masih valid (dalam jangka waktu 24 jam)
-            if os.time() - keyVerifiedTime < keyDuration then
-                verifiedKey = true
-            else
-                verifiedKey = false
-                keyVerifiedTime = nil
-            end
-        end
+-- Fungsi untuk validasi key dengan URL yang disediakan
+function OrionLib:ValidateKey(inputKey)
+    local success, response = pcall(function()
+        return HttpService:GetAsync(keyLink)
+    end)
+    if success then
+        validKey = response:match(inputKey) ~= nil
+    else
+        warn("Gagal mengambil key dari pastebin: " .. response)
+        validKey = false
     end
+    return validKey
 end
 
--- Fungsi untuk mengecek apakah key valid
-local function IsKeyValid()
-    return verifiedKey
-end
-
--- Load status key saat skrip dijalankan
-LoadKeyStatus()
-
--- Fungsi untuk menyembunyikan atau menampilkan tab selain "Key"
-local function SetTabVisibility(tabs, isVisible)
-    for _, tab in pairs(tabs) do
-        if tab.Name ~= "Key" then
-            tab:SetVisibility(isVisible)
-        end
+-- Fungsi untuk mengecek apakah key sudah kadaluarsa
+function OrionLib:IsKeyExpired()
+    if keyLastChecked ~= 0 and (os.time() - keyLastChecked) > keyExpirationTime then
+        return true
     end
+    return false
+end
+
+-- Fungsi untuk menyimpan waktu key yang terakhir berhasil
+function OrionLib:UpdateKeyCheckTime()
+    keyLastChecked = os.time()
 end
 
 
