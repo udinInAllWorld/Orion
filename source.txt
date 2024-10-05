@@ -1713,10 +1713,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Mengambil layanan yang diperlukan
 local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 
 -- Variabel untuk menyimpan waktu key terakhir digunakan
 local LastKeyTime = nil
@@ -1724,7 +1721,6 @@ local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
 
 -- URL untuk key yang valid
 local keyLink = "https://pastebin.com/raw/9n5jBW7v"
-local validKey = nil
 
 -- Fungsi untuk mengecek apakah key sudah kadaluarsa
 local function IsKeyExpired()
@@ -1770,42 +1766,11 @@ local function CheckKey(inputKey)
     end
 end
 
--- Fungsi untuk memanggil validasi key dari UI
-local function ValidateKeyAndDisplayFeatures(inputKey, OrionLib, MainTab, KeyTab)
-    local isValid, message = CheckKey(inputKey)
-
-    if isValid then
-        -- Tampilkan notifikasi bahwa key benar
-        OrionLib:MakeNotification({
-            Name = "Correct Key!",
-            Content = message,
-            Time = 5,
-            Image = "rbxassetid://4384403532"
-        })
-
-        -- Menampilkan tab fitur dan menyembunyikan tab input key
-        MainTab:SetVisibility(true)
-        KeyTab:SetVisibility(false)
-
-    else
-        -- Tampilkan notifikasi bahwa key salah
-        OrionLib:MakeNotification({
-            Name = "Wrong Key!",
-            Content = message,
-            Time = 5,
-            Image = "rbxassetid://4384403532"
-        })
-
-        -- Menyembunyikan tab fitur jika key salah
-        MainTab:SetVisibility(false)
-    end
+-- Fungsi untuk memastikan fitur disembunyikan jika key tidak valid
+local function ShouldHideFeatures()
+    return LastKeyTime == nil or IsKeyExpired()
 end
 
--- Ekspos fungsi validasi untuk dipanggil oleh script UI
-return {
-    CheckKey = CheckKey,
-    ValidateKeyAndDisplayFeatures = ValidateKeyAndDisplayFeatures
-}
 
 -- [Bagian lain dari skrip yang diperlukan]
 
