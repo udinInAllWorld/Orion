@@ -1716,16 +1716,41 @@ function OrionLib:MakeWindow(WindowConfig)
 local HttpService = game:GetService("HttpService")
 
 -- URL untuk key yang valid
-local keyLink = "https://pastebin.com/raw/9n5jBW7v"
+local KeyURL = "https://pastebin.com/raw/9n5jBW7v"
 local LastKeyTime = nil
-local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
+local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
 
--- Fungsi untuk mengecek apakah key sudah kadaluarsa
-function IsKeyExpired()
-    if LastKeyTime == nil then
-        return true
+-- Fungsi untuk mendapatkan key dari URL
+function GetValidKey()
+    local success, response = pcall(function()
+        return HttpService:GetAsync(KeyURL)
+    end)
+
+    if success then
+        local validKeys = {}
+        for key in response:gmatch("%S+") do
+            table.insert(validKeys, key)
+        end
+        return validKeys
+    else
+        warn("Tidak dapat mengambil key: " .. tostring(response))
+        return nil
     end
-    return (os.time() - LastKeyTime) > KeyExpiration
+end
+
+-- Fungsi untuk memvalidasi key yang dimasukkan pengguna
+function ValidateKey(inputKey)
+    local validKeys = GetValidKey()
+
+    if validKeys then
+        for _, validKey in ipairs(validKeys) do
+            if inputKey == validKey then
+                SaveKeyTime()
+                return true
+            end
+        end
+    end
+    return false
 end
 
 -- Fungsi untuk menyimpan waktu penggunaan key
@@ -1733,29 +1758,12 @@ function SaveKeyTime()
     LastKeyTime = os.time()
 end
 
--- Fungsi untuk mengambil key dari URL dan memvalidasinya
-function ValidateKey(inputKey)
-    local success, response = pcall(function()
-        return HttpService:GetAsync(keyLink)
-    end)
-    
-    if success then
-        local validKeys = {}
-        for key in response:gmatch("%S+") do
-            table.insert(validKeys, key)
-        end
-
-        for _, validKey in ipairs(validKeys) do
-            if inputKey == validKey then
-                SaveKeyTime()
-                return true
-            end
-        end
-    else
-        warn("Gagal mengambil key dari URL: " .. tostring(response))
+-- Fungsi untuk mengecek apakah key sudah kadaluarsa
+function IsKeyExpired()
+    if LastKeyTime == nil then
+        return true
     end
-
-    return false
+    return (os.time() - LastKeyTime) > KeyExpiration
 end
 
 -- Fungsi untuk mengecek status key (valid atau kadaluarsa)
