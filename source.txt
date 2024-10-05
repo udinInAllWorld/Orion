@@ -1753,6 +1753,7 @@ end
 -- Load status verifikasi saat script dijalankan
 LoadKeyStatus()
 
+
 -- [Bagian lain dari skrip yang diperlukan]
 
 	
