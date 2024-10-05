@@ -1714,7 +1714,7 @@ function OrionLib:MakeWindow(WindowConfig)
 -- [Bagian library Orion dan fungsi lainnya]
 
 -- Durasi validitas key dalam detik
-local keyDuration = 120  -- 24 jam dalam detik
+local keyDuration = 86400  -- 24 jam dalam detik
 local verifiedKey = false
 local keyVerifiedTime = nil
 
