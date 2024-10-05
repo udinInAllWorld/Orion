@@ -1713,13 +1713,19 @@ function OrionLib:MakeWindow(WindowConfig)
 
 local validKey = nil
 local lastKeyTime = os.time()  -- waktu terakhir key diinput
+local keyDuration = 86400  -- 24 jam dalam detik
 
--- Fungsi validasi key dari UI
+-- Fungsi untuk menyimpan key valid yang diambil dari UI
+function setValidKey(key)
+    validKey = key
+    lastKeyTime = os.time()  -- simpan waktu saat key diinput
+end
+
+-- Fungsi validasi key
 function validateKey(userKey)
-    -- validKey diambil dari UI library
     if userKey == validKey then
         print("Correct Key! Features Unlocked!")
-        lastKeyTime = os.time()  -- simpan waktu saat key dimasukkan
+        setValidKey(userKey)  -- Simpan key yang valid
         return true
     else
         print("Wrong Key! Try Again.")
@@ -1729,8 +1735,9 @@ end
 
 -- Fungsi untuk mengecek apakah 24 jam telah berlalu
 function checkKeyExpiration()
-    if os.difftime(os.time(), lastKeyTime) > 86400 then  -- 86400 detik = 24 jam
+    if os.difftime(os.time(), lastKeyTime) > keyDuration then  -- 86400 detik = 24 jam
         print("Key Expired. Please enter the key again.")
+        validKey = nil  -- Reset validKey
         return false
     else
         return true
@@ -1741,7 +1748,7 @@ end
 function hideFeaturesIfExpired()
     if not checkKeyExpiration() then
         -- Tindakan untuk hide fitur
-        hideAllFeatures()
+        hideAllFeatures()  -- Pastikan fungsi ini didefinisikan di bagian lain dari script
     end
 end
 
@@ -1750,6 +1757,7 @@ while true do
     hideFeaturesIfExpired()
     wait(60)  -- cek setiap 60 detik
 end
+
 	
 	--if writefile and isfile then
 	--	if not isfile("NewLibraryNotification1.txt") then
