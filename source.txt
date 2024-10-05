@@ -1715,7 +1715,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 local validKey = nil
 local lastKeyTime = os.time()  -- waktu terakhir key diinput
-local keyDuration = 86400  -- 24 jam dalam detik
+local keyDuration = 120  -- 24 jam dalam detik
 
 -- Fungsi untuk menyimpan key valid
 function setValidKey(key)
