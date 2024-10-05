@@ -1713,10 +1713,12 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Key dan Pengaturan Kadaluarsa
-local ValidKey = "12345"  -- Key yang valid
-local LastKeyTime = nil            -- Waktu saat key terakhir kali berhasil dimasukkan
-local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
+local HttpService = game:GetService("HttpService")
+
+-- URL untuk key yang valid
+local keyLink = "https://pastebin.com/raw/9n5jBW7v"
+local LastKeyTime = nil
+local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
 
 -- Fungsi untuk Mengecek Apakah Key Sudah Kadaluarsa
 function IsKeyExpired()
@@ -1726,17 +1728,27 @@ function IsKeyExpired()
     return (os.time() - LastKeyTime) > KeyExpiration
 end
 
--- Fungsi untuk Menyimpan Waktu Penggunaan Key yang Valid
+-- Fungsi untuk Menyimpan Waktu Penggunaan Key
 function SaveKeyTime()
     LastKeyTime = os.time()
 end
 
--- Fungsi untuk Memvalidasi Key yang Dimasukkan Pengguna
+-- Fungsi untuk Mengambil dan Memvalidasi Key dari Pastebin
 function ValidateKey(inputKey)
-    if inputKey == ValidKey then
-        SaveKeyTime()
-        return true
+    local success, response = pcall(function()
+        return HttpService:GetAsync(keyLink)
+    end)
+
+    if success then
+        -- Jika key yang dimasukkan cocok dengan key yang ada di Pastebin
+        if response:find(inputKey) then
+            SaveKeyTime()
+            return true
+        else
+            return false
+        end
     else
+        warn("Gagal mengambil key dari Pastebin: " .. response)
         return false
     end
 end
