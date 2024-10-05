@@ -1713,26 +1713,25 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Inisialisasi variabel untuk key dan masa kadaluarsa
-local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
-local ValidKey = "LOVE"  -- Key yang valid ditetapkan di sini
-local LastKeyTime = nil
+-- Key dan Pengaturan Kadaluarsa
+local ValidKey = "12345"  -- Key yang valid
+local LastKeyTime = nil            -- Waktu saat key terakhir kali berhasil dimasukkan
+local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
 
--- Fungsi untuk mengecek apakah key sudah kadaluarsa
+-- Fungsi untuk Mengecek Apakah Key Sudah Kadaluarsa
 function IsKeyExpired()
     if LastKeyTime == nil then
         return true
     end
-    -- Mengecek apakah sudah lebih dari 24 jam
     return (os.time() - LastKeyTime) > KeyExpiration
 end
 
--- Fungsi untuk menyimpan waktu penggunaan key
+-- Fungsi untuk Menyimpan Waktu Penggunaan Key yang Valid
 function SaveKeyTime()
     LastKeyTime = os.time()
 end
 
--- Fungsi untuk validasi key
+-- Fungsi untuk Memvalidasi Key yang Dimasukkan Pengguna
 function ValidateKey(inputKey)
     if inputKey == ValidKey then
         SaveKeyTime()
@@ -1742,7 +1741,7 @@ function ValidateKey(inputKey)
     end
 end
 
--- Fungsi untuk mengecek status key (valid atau kadaluarsa)
+-- Fungsi untuk Mengecek Status Key
 function CheckKey(inputKey)
     if IsKeyExpired() then
         return false, "Key expired. Please enter a new key."
@@ -1753,7 +1752,7 @@ function CheckKey(inputKey)
     end
 end
 
--- Fungsi untuk memastikan fitur disembunyikan jika key tidak valid
+-- Fungsi untuk Mengecek Apakah Fitur Harus Disembunyikan
 function ShouldHideFeatures()
     return LastKeyTime == nil or IsKeyExpired()
 end
