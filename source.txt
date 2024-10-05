@@ -1724,11 +1724,19 @@ end
 -- Fungsi validasi key
 function validateKey(userKey)
     if userKey == validKey then
-        print("Correct Key! Features Unlocked!")
+        OrionLib:MakeNotification({
+            Name = "Success",
+            Content = "Correct Key! Features Unlocked!",
+            Time = 5
+        })
         setValidKey(userKey)  -- Simpan key yang valid
         return true
     else
-        print("Wrong Key! Try Again.")
+        OrionLib:MakeNotification({
+            Name = "Error",
+            Content = "Wrong Key! Try Again.",
+            Time = 5
+        })
         return false
     end
 end
@@ -1736,8 +1744,12 @@ end
 -- Fungsi untuk mengecek apakah 24 jam telah berlalu
 function checkKeyExpiration()
     if os.difftime(os.time(), lastKeyTime) > keyDuration then  -- 86400 detik = 24 jam
-        print("Key Expired. Please enter the key again.")
         validKey = nil  -- Reset validKey
+        OrionLib:MakeNotification({
+            Name = "Expired",
+            Content = "Key Expired. Please enter the key again.",
+            Time = 5
+        })
         return false
     else
         return true
@@ -1747,16 +1759,17 @@ end
 -- Fungsi untuk menyembunyikan fitur jika key tidak valid atau telah kadaluarsa
 function hideFeaturesIfExpired()
     if not checkKeyExpiration() then
-        -- Tindakan untuk hide fitur
         hideAllFeatures()  -- Pastikan fungsi ini didefinisikan di bagian lain dari script
     end
 end
 
 -- Loop untuk cek kadaluarsa secara periodik
-while true do
-    hideFeaturesIfExpired()
-    wait(60)  -- cek setiap 60 detik
-end
+task.spawn(function()
+    while true do
+        hideFeaturesIfExpired()
+        wait(60)  -- cek setiap 60 detik
+    end
+end)
 
 	
 	--if writefile and isfile then
