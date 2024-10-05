@@ -1711,11 +1711,13 @@ function OrionLib:MakeWindow(WindowConfig)
 		return ElementFunction   
 	end  
 
+-- [Bagian library Orion dan fungsi lainnya]
+
 local validKey = nil
 local lastKeyTime = os.time()  -- waktu terakhir key diinput
 local keyDuration = 86400  -- 24 jam dalam detik
 
--- Fungsi untuk menyimpan key valid yang diambil dari UI
+-- Fungsi untuk menyimpan key valid
 function setValidKey(key)
     validKey = key
     lastKeyTime = os.time()  -- simpan waktu saat key diinput
@@ -1730,6 +1732,7 @@ function validateKey(userKey)
             Time = 5
         })
         setValidKey(userKey)  -- Simpan key yang valid
+        showFeatures()  -- Fungsi untuk menampilkan fitur yang disembunyikan
         return true
     else
         OrionLib:MakeNotification({
@@ -1743,13 +1746,14 @@ end
 
 -- Fungsi untuk mengecek apakah 24 jam telah berlalu
 function checkKeyExpiration()
-    if os.difftime(os.time(), lastKeyTime) > keyDuration then  -- 86400 detik = 24 jam
+    if os.difftime(os.time(), lastKeyTime) > keyDuration then
         validKey = nil  -- Reset validKey
         OrionLib:MakeNotification({
             Name = "Expired",
             Content = "Key Expired. Please enter the key again.",
             Time = 5
         })
+        hideAllFeatures()  -- Pastikan fungsi ini didefinisikan untuk menyembunyikan fitur
         return false
     else
         return true
@@ -1759,7 +1763,7 @@ end
 -- Fungsi untuk menyembunyikan fitur jika key tidak valid atau telah kadaluarsa
 function hideFeaturesIfExpired()
     if not checkKeyExpiration() then
-        hideAllFeatures()  -- Pastikan fungsi ini didefinisikan di bagian lain dari script
+        hideAllFeatures()  -- Menyembunyikan semua fitur
     end
 end
 
@@ -1770,6 +1774,28 @@ task.spawn(function()
         wait(60)  -- cek setiap 60 detik
     end
 end)
+
+-- [Bagian untuk menghubungkan UI dan validasi key]
+-- Contoh menghubungkan input key dari UI ke fungsi validateKey
+TabKey:AddTextbox({
+    Name = "Enter Key",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(value)
+        validateKey(value) -- Panggil fungsi validasi saat key dimasukkan
+    end
+})
+
+-- Fungsi untuk menampilkan fitur setelah key valid
+function showFeatures()
+    -- Tampilkan semua fitur
+    tabHome.Visible = true
+    tabCombat.Visible = true
+    tabTeleports.Visible = true
+    -- Tambahkan logika untuk menampilkan fitur lain sesuai kebutuhan
+end
+
+-- [Bagian lain dari skrip yang diperlukan]
 
 	
 	--if writefile and isfile then
