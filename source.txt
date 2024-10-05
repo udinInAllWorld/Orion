@@ -1728,7 +1728,8 @@ function GetValidKey()
     end)
 
     if success then
-        ValidKey = response:gsub("%s+", "") -- Menghapus semua karakter kosong
+        ValidKey = response:gsub("%s+", "") -- Menghapus semua karakter kosong dan spasi
+        print("Valid Key Retrieved: ", ValidKey) -- Debugging untuk melihat key yang didapat
         return ValidKey
     else
         warn("Tidak dapat mengambil key: " .. tostring(response))
@@ -1744,8 +1745,10 @@ function ValidateKey(inputKey)
 
     if inputKey == ValidKey then
         SaveKeyTime()
+        print("Key Validated Successfully") -- Debugging untuk memastikan key valid
         return true
     else
+        print("Invalid Key Entered") -- Debugging untuk key yang salah
         return false
     end
 end
