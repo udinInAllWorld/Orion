@@ -1757,6 +1757,15 @@ end
 -- Load status verifikasi saat script dijalankan
 LoadKeyStatus()
 
+-- Fungsi untuk mengatur visibilitas tab berdasarkan status key
+local function SetTabVisibility(tabs, isVisible)
+    for _, tab in pairs(tabs) do
+        if tab.Name ~= "Key" then
+            tab:SetVisibility(isVisible)
+        end
+    end
+end
+
 
 -- [Bagian lain dari skrip yang diperlukan]
 
