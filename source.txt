@@ -1717,6 +1717,7 @@ local HttpService = game:GetService("HttpService")
 
 -- URL untuk key yang valid
 local KeyURL = "https://pastebin.com/raw/9n5jBW7v"
+local ValidKey = nil
 local LastKeyTime = nil
 local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
 
@@ -1727,11 +1728,8 @@ function GetValidKey()
     end)
 
     if success then
-        local validKeys = {}
-        for key in response:gmatch("%S+") do
-            table.insert(validKeys, key)
-        end
-        return validKeys
+        ValidKey = response:gsub("%s+", "") -- Menghapus semua karakter kosong
+        return ValidKey
     else
         warn("Tidak dapat mengambil key: " .. tostring(response))
         return nil
@@ -1740,17 +1738,16 @@ end
 
 -- Fungsi untuk memvalidasi key yang dimasukkan pengguna
 function ValidateKey(inputKey)
-    local validKeys = GetValidKey()
-
-    if validKeys then
-        for _, validKey in ipairs(validKeys) do
-            if inputKey == validKey then
-                SaveKeyTime()
-                return true
-            end
-        end
+    if not ValidKey then
+        GetValidKey()
     end
-    return false
+
+    if inputKey == ValidKey then
+        SaveKeyTime()
+        return true
+    else
+        return false
+    end
 end
 
 -- Fungsi untuk menyimpan waktu penggunaan key
