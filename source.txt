@@ -1713,59 +1713,45 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
-local validKey = nil
-local lastKeyTime = os.time()  -- waktu terakhir key diinput
+-- Durasi validitas key dalam detik
 local keyDuration = 120  -- 24 jam dalam detik
+local verifiedKey = false
+local keyVerifiedTime = nil
 
--- Fungsi untuk menyimpan key valid
-function setValidKey(key)
-    validKey = key
-    lastKeyTime = os.time()  -- simpan waktu saat key diinput
+-- Fungsi untuk menyimpan status verifikasi
+local function SaveKeyStatus(time)
+    verifiedKey = true
+    keyVerifiedTime = time
+    -- Simpan ke file untuk persistensi
+    writefile(OrionLib.Folder .. "/key_status.txt", tostring(time))
 end
 
--- Fungsi validasi key
-function validateKey(userKey)
-    if userKey == validKey then
-        print("Correct Key! Features Unlocked!")
-        setValidKey(userKey)  -- Simpan key yang valid
-        showFeatures()  -- Fungsi untuk menampilkan fitur yang disembunyikan
-    else
-        print("Wrong Key! Try Again.")
+-- Fungsi untuk memuat status verifikasi
+local function LoadKeyStatus()
+    if isfile(OrionLib.Folder .. "/key_status.txt") then
+        local savedTime = tonumber(readfile(OrionLib.Folder .. "/key_status.txt"))
+        if savedTime then
+            keyVerifiedTime = savedTime
+            if os.time() - keyVerifiedTime < keyDuration then
+                verifiedKey = true
+            else
+                verifiedKey = false
+                keyVerifiedTime = nil
+            end
+        end
     end
 end
 
--- Fungsi untuk mengecek apakah 24 jam telah berlalu
-function checkKeyExpiration()
-    if os.difftime(os.time(), lastKeyTime) > keyDuration then  -- 86400 detik = 24 jam
-        validKey = nil  -- Reset validKey
-        print("Key Expired. Please enter the key again.")
-        return false
-    else
-        return true
+-- Fungsi untuk mengecek apakah key valid
+local function IsKeyValid()
+    if verifiedKey and keyVerifiedTime then
+        return os.time() - keyVerifiedTime < keyDuration
     end
+    return false
 end
 
--- Fungsi untuk menyembunyikan fitur jika key tidak valid atau telah kadaluarsa
-function hideFeaturesIfExpired()
-    if not checkKeyExpiration() then
-        hideAllFeatures()  -- Pastikan fungsi ini didefinisikan di bagian lain dari script
-    end
-end
-
--- Loop untuk cek kadaluarsa secara periodik
-task.spawn(function()
-    while true do
-        hideFeaturesIfExpired()
-        wait(60)  -- cek setiap 60 detik
-    end
-end)
-
--- Fungsi untuk menampilkan fitur
-function showFeatures()
-    -- Logika untuk menampilkan fitur
-    print("Features are now visible!")  -- Ganti dengan logika yang sesuai
-end
-
+-- Load status verifikasi saat script dijalankan
+LoadKeyStatus()
 
 -- [Bagian lain dari skrip yang diperlukan]
 
