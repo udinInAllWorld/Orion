@@ -1713,40 +1713,57 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Menambahkan fungsi untuk mengatur validasi key dan masa berlaku key 24 jam
-local HttpService = game:GetService("HttpService")
-local keyLink = "https://pastebin.com/raw/9n5jBW7v"
-local validKey = nil
-local keyLastChecked = 0
+-- Variabel untuk menyimpan waktu key terakhir digunakan
+local LastKeyTime = nil
 local keyDuration = 120 -- 24 jam dalam detik
 
--- Fungsi untuk validasi key dengan URL yang disediakan
-function OrionLib:ValidateKey(inputKey)
+-- URL untuk key yang valid
+local keyLink = "https://pastebin.com/raw/9n5jBW7v"
+local HttpService = game:GetService("HttpService")
+
+-- Fungsi untuk mengecek apakah key sudah kadaluarsa
+local function IsKeyExpired()
+    if LastKeyTime == nil then
+        return true
+    end
+    -- Mengecek apakah sudah lebih dari 24 jam
+    return (os.time() - LastKeyTime) > KeyExpiration
+end
+
+-- Fungsi untuk menyimpan waktu penggunaan key
+local function SaveKeyTime()
+    LastKeyTime = os.time()
+end
+
+-- Fungsi untuk validasi key
+local function ValidateKey(inputKey)
     local success, response = pcall(function()
         return HttpService:GetAsync(keyLink)
     end)
     if success then
-        validKey = response:match(inputKey) ~= nil
+        -- Jika key cocok, simpan waktu penggunaan
+        if response:match(inputKey) then
+            SaveKeyTime()
+            return true
+        else
+            return false
+        end
     else
         warn("Gagal mengambil key dari pastebin: " .. response)
-        validKey = false
+        return false
     end
-    return validKey
 end
 
--- Fungsi untuk mengecek apakah key sudah kadaluarsa
-function OrionLib:IsKeyExpired()
-    if keyLastChecked ~= 0 and (os.time() - keyLastChecked) > keyExpirationTime then
-        return true
+-- Fungsi untuk mengecek status key (valid atau kadaluarsa)
+local function CheckKey(inputKey)
+    if IsKeyExpired() then
+        return false, "Key expired. Please enter a new key."
+    elseif ValidateKey(inputKey) then
+        return true, "Correct Key! Features Unlocked!"
+    else
+        return false, "Wrong Key! Try again."
     end
-    return false
 end
-
--- Fungsi untuk menyimpan waktu key yang terakhir berhasil
-function OrionLib:UpdateKeyCheckTime()
-    keyLastChecked = os.time()
-end
-
 
 -- [Bagian lain dari skrip yang diperlukan]
 
