@@ -1714,7 +1714,7 @@ function OrionLib:MakeWindow(WindowConfig)
 -- [Bagian library Orion dan fungsi lainnya]
 
 -- Durasi validitas key dalam detik
-local keyDuration = 86400  -- 24 jam dalam detik
+local keyDuration = 86400  -- 24 jam dalam detik (24 jam)
 local verifiedKey = false
 local keyVerifiedTime = nil
 
@@ -1726,6 +1726,7 @@ local function SaveKeyStatus(time)
         Verified = true,
         Time = time
     }
+    -- Simpan status key ke file untuk persistensi
     writefile("OrionKeySystem/key_status.txt", game:GetService("HttpService"):JSONEncode(keyData))
 end
 
@@ -1736,6 +1737,7 @@ local function LoadKeyStatus()
         local keyData = game:GetService("HttpService"):JSONDecode(data)
         if keyData and keyData.Verified and keyData.Time then
             keyVerifiedTime = keyData.Time
+            -- Cek apakah key masih valid (dalam jangka waktu 24 jam)
             if os.time() - keyVerifiedTime < keyDuration then
                 verifiedKey = true
             else
@@ -1748,16 +1750,13 @@ end
 
 -- Fungsi untuk mengecek apakah key valid
 local function IsKeyValid()
-    if verifiedKey and keyVerifiedTime then
-        return os.time() - keyVerifiedTime < keyDuration
-    end
-    return false
+    return verifiedKey
 end
 
--- Load status verifikasi saat script dijalankan
+-- Load status key saat skrip dijalankan
 LoadKeyStatus()
 
--- Fungsi untuk mengatur visibilitas tab berdasarkan status key
+-- Fungsi untuk menyembunyikan atau menampilkan tab selain "Key"
 local function SetTabVisibility(tabs, isVisible)
     for _, tab in pairs(tabs) do
         if tab.Name ~= "Key" then
