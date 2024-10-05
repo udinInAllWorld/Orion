@@ -1753,6 +1753,17 @@ end
 -- Load status verifikasi saat script dijalankan
 LoadKeyStatus()
 
+-- Fungsi untuk menyembunyikan semua tab kecuali tab key
+local function HideAllTabsExceptKey(Window)
+    for _, tab in pairs(Window:GetTabs()) do
+        if tab.Name ~= "Key" then
+            tab:SetVisibility(false)
+        end
+    end
+end
+
+-- Memanggil fungsi untuk menyembunyikan tab saat script dijalankan
+HideAllTabsExceptKey(OrionLib)
 
 
 -- [Bagian lain dari skrip yang diperlukan]
