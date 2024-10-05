@@ -1714,13 +1714,13 @@ function OrionLib:MakeWindow(WindowConfig)
 -- [Bagian library Orion dan fungsi lainnya]
 
 local HttpService = game:GetService("HttpService")
-local KeyStoragePath = "ArrayField/Key System/KeyFile.rfld"
-local ValidKeyURL = "https://pastebin.com/raw/9n5jBW7v"
 
+-- URL untuk key yang valid
+local keyLink = "https://pastebin.com/raw/9n5jBW7v"
 local LastKeyTime = nil
-local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key selama 24 jam
+local KeyExpiration = 24 * 60 * 60 -- 24 jam dalam detik
 
--- Fungsi untuk memeriksa apakah key sudah kadaluarsa
+-- Fungsi untuk mengecek apakah key sudah kadaluarsa
 function IsKeyExpired()
     if LastKeyTime == nil then
         return true
@@ -1733,31 +1733,32 @@ function SaveKeyTime()
     LastKeyTime = os.time()
 end
 
--- Fungsi untuk mengambil key yang valid dari URL
-function GetValidKey()
-    local success, response = pcall(function()
-        return HttpService:GetAsync(ValidKeyURL)
-    end)
-    if success then
-        return response:gsub("%s+", "")
-    else
-        warn("Gagal mengambil key dari URL: " .. response)
-        return nil
-    end
-end
-
--- Fungsi untuk memvalidasi key yang dimasukkan pengguna
+-- Fungsi untuk mengambil key dari URL dan memvalidasinya
 function ValidateKey(inputKey)
-    local validKey = GetValidKey()
-    if validKey and inputKey == validKey then
-        SaveKeyTime()
-        return true
+    local success, response = pcall(function()
+        return HttpService:GetAsync(keyLink)
+    end)
+    
+    if success then
+        local validKeys = {}
+        for key in response:gmatch("%S+") do
+            table.insert(validKeys, key)
+        end
+
+        for _, validKey in ipairs(validKeys) do
+            if inputKey == validKey then
+                SaveKeyTime()
+                return true
+            end
+        end
     else
-        return false
+        warn("Gagal mengambil key dari URL: " .. tostring(response))
     end
+
+    return false
 end
 
--- Fungsi untuk mengecek status key
+-- Fungsi untuk mengecek status key (valid atau kadaluarsa)
 function CheckKey(inputKey)
     if IsKeyExpired() then
         return false, "Key expired. Please enter a new key."
@@ -1768,7 +1769,7 @@ function CheckKey(inputKey)
     end
 end
 
--- Fungsi untuk mengecek apakah fitur harus disembunyikan
+-- Fungsi untuk memastikan fitur disembunyikan jika key tidak valid
 function ShouldHideFeatures()
     return LastKeyTime == nil or IsKeyExpired()
 end
