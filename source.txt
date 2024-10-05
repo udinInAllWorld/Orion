@@ -1727,7 +1727,7 @@ function GetValidKey()
         return HttpService:GetAsync(KeyURL)
     end)
 
-    if success then
+    if success and response then
         ValidKey = response:gsub("%s+", "") -- Menghapus semua karakter kosong
         print("Valid Key Retrieved: ", ValidKey) -- Debugging untuk melihat key yang didapat
         return ValidKey
@@ -1743,17 +1743,17 @@ function ValidateKey(inputKey)
     if not ValidKey then
         ValidKey = GetValidKey()
         if not ValidKey then
-            return false -- Jika key tidak berhasil diambil, tidak dapat memvalidasi
+            return false, "Unable to retrieve key from server. Please try again later." -- Jika key tidak berhasil diambil, tidak dapat memvalidasi
         end
     end
 
     if inputKey == ValidKey then
         SaveKeyTime()
         print("Key Validated Successfully") -- Debugging untuk memastikan key valid
-        return true
+        return true, "Correct Key! Features Unlocked!"
     else
         print("Invalid Key Entered") -- Debugging untuk key yang salah
-        return false
+        return false, "Wrong Key! Please try again."
     end
 end
 
@@ -1774,10 +1774,9 @@ end
 function CheckKey(inputKey)
     if IsKeyExpired() then
         return false, "Key expired. Please enter a new key."
-    elseif ValidateKey(inputKey) then
-        return true, "Correct Key! Features Unlocked!"
     else
-        return false, "Wrong Key! Try again."
+        local valid, message = ValidateKey(inputKey)
+        return valid, message
     end
 end
 
