@@ -1717,34 +1717,28 @@ function OrionLib:MakeWindow(WindowConfig)
 local KeyValid = false
 local KeyExpireTime = nil
 local correctKey = "boss" -- Key yang valid
+local keyFile = "AnimeStrikeKey.txt" -- Nama file untuk menyimpan key dan expired time
 
--- Fungsi untuk mengecek apakah key masih valid
-local function checkKeyValid()
-    if KeyExpireTime then
-        if os.time() > KeyExpireTime then
-            KeyValid = false
-            print("Key Expired: Please enter a new key.")
-        end
-    end
-    return KeyValid
-end
-
--- Fungsi untuk menyimpan key ke config agar tidak perlu dimasukkan ulang
+-- Fungsi untuk menyimpan key ke file
 local function saveKeyConfig()
-    -- Simpan key dan waktu expired ke dalam config
-    game:SetFastFlag("SavedKey", correctKey)
-    game:SetFastFlag("KeyExpireTime", KeyExpireTime)
+    local data = {
+        key = correctKey,
+        expireTime = KeyExpireTime
+    }
+    writefile(keyFile, game:GetService("HttpService"):JSONEncode(data))
 end
 
--- Fungsi untuk memuat key dari config yang telah disimpan
+-- Fungsi untuk memuat key dari file
 local function loadKeyConfig()
-    -- Muat key dari config
-    local savedKey = game:GetFastFlag("SavedKey")
-    local expireTime = game:GetFastFlag("KeyExpireTime")
-    
-    if savedKey == correctKey and expireTime > os.time() then
-        KeyValid = true
-        KeyExpireTime = expireTime
+    if isfile(keyFile) then
+        local data = readfile(keyFile)
+        local keyData = game:GetService("HttpService"):JSONDecode(data)
+        if keyData.key == correctKey and keyData.expireTime > os.time() then
+            KeyValid = true
+            KeyExpireTime = keyData.expireTime
+        else
+            KeyValid = false
+        end
     else
         KeyValid = false
     end
@@ -1754,14 +1748,14 @@ end
 local function updateTabVisibility()
     if KeyValid then
         -- Unhide semua tab lain
-        MiscTab.Visible = true
-        FightTab.Visible = true
-        SummonTab.Visible = true
+        MiscTab:Set("Visible", true)
+        FightTab:Set("Visible", true)
+        SummonTab:Set("Visible", true)
     else
         -- Hide semua tab lain hingga key valid
-        MiscTab.Visible = false
-        FightTab.Visible = false
-        SummonTab.Visible = false
+        MiscTab:Set("Visible", false)
+        FightTab:Set("Visible", false)
+        SummonTab:Set("Visible", false)
     end
 end
 
