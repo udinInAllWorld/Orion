@@ -1713,44 +1713,89 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
-local LastKeyTime = nil
-local KeyExpiration = 24 * 60 * 60 -- Masa berlaku key adalah 24 jam
-local ValidKey = "LOVE" -- Key yang tetap untuk validasi
+-- Inisialisasi Key System
+local KeyValid = false
+local KeyExpireTime = nil
+local correctKey = "boss" -- Key yang valid
 
--- Fungsi untuk memvalidasi key yang dimasukkan pengguna
-function ValidateKey(inputKey)
-    if inputKey == ValidKey then
-        SaveKeyTime()
-        print("Key Validated Successfully") -- Debugging untuk memastikan key valid
-        return true, "Correct Key! Features Unlocked!"
+-- Fungsi untuk mengecek apakah key masih valid
+local function checkKeyValid()
+    if KeyExpireTime then
+        if os.time() > KeyExpireTime then
+            KeyValid = false
+            print("Key Expired: Please enter a new key.")
+        end
+    end
+    return KeyValid
+end
+
+-- Fungsi untuk menyimpan key ke config agar tidak perlu dimasukkan ulang
+local function saveKeyConfig()
+    -- Simpan key dan waktu expired ke dalam config
+    game:SetFastFlag("SavedKey", correctKey)
+    game:SetFastFlag("KeyExpireTime", KeyExpireTime)
+end
+
+-- Fungsi untuk memuat key dari config yang telah disimpan
+local function loadKeyConfig()
+    -- Muat key dari config
+    local savedKey = game:GetFastFlag("SavedKey")
+    local expireTime = game:GetFastFlag("KeyExpireTime")
+    
+    if savedKey == correctKey and expireTime > os.time() then
+        KeyValid = true
+        KeyExpireTime = expireTime
     else
-        print("Invalid Key Entered: ", inputKey) -- Debugging untuk key yang salah
-        return false, "Wrong Key! Please try again."
+        KeyValid = false
     end
 end
 
--- Fungsi untuk menyimpan waktu penggunaan key
-function SaveKeyTime()
-    LastKeyTime = os.time()
-end
-
--- Fungsi untuk mengecek apakah key sudah kadaluarsa
-function IsKeyExpired()
-    if LastKeyTime == nil then
-        return true
-    end
-    return (os.time() - LastKeyTime) > KeyExpiration
-end
-
--- Fungsi untuk mengecek status key (valid atau kadaluarsa)
-function CheckKey(inputKey)
-    if IsKeyExpired() then
-        return false, "Key expired. Please enter a new key."
+-- Hide/unhide tab sesuai status key
+local function updateTabVisibility()
+    if KeyValid then
+        -- Unhide semua tab lain
+        MiscTab.Visible = true
+        FightTab.Visible = true
+        SummonTab.Visible = true
     else
-        local valid, message = ValidateKey(inputKey)
-        return valid, message
+        -- Hide semua tab lain hingga key valid
+        MiscTab.Visible = false
+        FightTab.Visible = false
+        SummonTab.Visible = false
     end
 end
+
+-- Membuat bagian untuk memasukkan key
+local function createKeyInput()
+    print("Please enter your key:")
+    local enteredKey = io.read() -- Membaca key yang dimasukkan
+    if enteredKey == correctKey then
+        KeyValid = true
+        KeyExpireTime = os.time() + (24 * 60 * 60) -- Key berlaku selama 24 jam
+        print("Key accepted. Valid for 24 hours.")
+        saveKeyConfig() -- Simpan key dan waktu expired
+        updateTabVisibility() -- Unhide tab lain
+    else
+        print("Invalid key. Please try again.")
+    end
+end
+
+-- Muat key dari config
+loadKeyConfig()
+
+-- Perbarui visibilitas tab sesuai status key
+updateTabVisibility()
+
+-- Periksa apakah key masih valid setiap 5 detik
+spawn(function()
+    while true do
+        if not checkKeyValid() then
+            updateTabVisibility() -- Hide tab jika key expired
+            createKeyInput() -- Meminta key baru jika expired
+        end
+        wait(5)
+    end
+end)
 
 
 -- [Bagian lain dari skrip yang diperlukan]
