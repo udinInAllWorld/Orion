@@ -1765,7 +1765,7 @@ local function createKeyInput()
     local enteredKey = io.read() -- Membaca key yang dimasukkan
     if enteredKey == correctKey then
         KeyValid = true
-        KeyExpireTime = os.time() + (24 * 60 * 60) -- Key berlaku selama 24 jam
+        KeyExpireTime = os.time() + (300 * 60) -- Key berlaku selama 24 jam
         print("Key accepted. Valid for 24 hours.")
         saveKeyConfig() -- Simpan key dan waktu expired
         updateTabVisibility() -- Unhide tab lain
