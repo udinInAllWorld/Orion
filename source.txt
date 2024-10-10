@@ -1713,13 +1713,20 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Inisialisasi Key System
+-- Inisialisasi variabel untuk status key
 local KeyValid = false
 local KeyExpireTime = nil
 local correctKey = "boss" -- Key yang valid
-local keyFile = "AnimeStrikeKey.txt" -- Nama file untuk menyimpan key dan expired time
+local keyFile = "AnimeStrikeKey.txt" -- File untuk menyimpan key dan waktu kedaluwarsa
 
--- Fungsi untuk menyimpan key ke file
+-- Fungsi untuk memulai waktu key
+local function StartKeyTimer(durationMinutes)
+    KeyExpireTime = os.time() + (durationMinutes * 60)
+    KeyValid = true
+    saveKeyConfig() -- Simpan key dan waktu kedaluwarsa
+end
+
+-- Fungsi untuk menyimpan konfigurasi key
 local function saveKeyConfig()
     local data = {
         key = correctKey,
@@ -1728,7 +1735,7 @@ local function saveKeyConfig()
     writefile(keyFile, game:GetService("HttpService"):JSONEncode(data))
 end
 
--- Fungsi untuk memuat key dari file
+-- Fungsi untuk memuat konfigurasi key dari file
 local function loadKeyConfig()
     if isfile(keyFile) then
         local data = readfile(keyFile)
@@ -1744,52 +1751,37 @@ local function loadKeyConfig()
     end
 end
 
--- Hide/unhide tab sesuai status key
-local function updateTabVisibility()
+-- Fungsi untuk mendapatkan waktu sisa key
+local function GetKeyTimeRemaining()
+    if KeyExpireTime then
+        local timeLeft = KeyExpireTime - os.time()
+        if timeLeft > 0 then
+            local minutes = math.floor(timeLeft / 60)
+            local seconds = timeLeft % 60
+            return string.format("%02d:%02d", minutes, seconds)
+        else
+            KeyValid = false
+            return "Key telah kedaluwarsa"
+        end
+    else
+        return "Key tidak aktif"
+    end
+end
+
+-- Fungsi untuk menampilkan status key
+local function GetKeyStatus()
     if KeyValid then
-        -- Unhide semua tab lain
-        MiscTab:Set("Visible", true)
-        FightTab:Set("Visible", true)
-        SummonTab:Set("Visible", true)
+        return "Key aktif. Waktu tersisa: " .. GetKeyTimeRemaining()
     else
-        -- Hide semua tab lain hingga key valid
-        MiscTab:Set("Visible", false)
-        FightTab:Set("Visible", false)
-        SummonTab:Set("Visible", false)
+        return "Key tidak valid atau telah kedaluwarsa."
     end
 end
 
--- Membuat bagian untuk memasukkan key
-local function createKeyInput()
-    print("Please enter your key:")
-    local enteredKey = io.read() -- Membaca key yang dimasukkan
-    if enteredKey == correctKey then
-        KeyValid = true
-        KeyExpireTime = os.time() + (300 * 60) -- Key berlaku selama 5min
-        print("Key accepted. Valid for 5min.")
-        saveKeyConfig() -- Simpan key dan waktu expired
-        updateTabVisibility() -- Unhide tab lain
-    else
-        print("Invalid key. Please try again.")
-    end
-end
-
--- Muat key dari config
+-- Muat konfigurasi key saat memulai
 loadKeyConfig()
 
--- Perbarui visibilitas tab sesuai status key
-updateTabVisibility()
-
--- Periksa apakah key masih valid setiap 5 detik
-spawn(function()
-    while true do
-        if not checkKeyValid() then
-            updateTabVisibility() -- Hide tab jika key expired
-            createKeyInput() -- Meminta key baru jika expired
-        end
-        wait(5)
-    end
-end)
+-- Memulai timer key dengan durasi 2 menit
+StartKeyTimer(2) -- Mengatur durasi key menjadi 2 menit
 
 
 -- [Bagian lain dari skrip yang diperlukan]
