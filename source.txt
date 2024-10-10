@@ -1715,7 +1715,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- Inisialisasi Key System
 local KeyValid = false
-local KeyExpireTime = os.time() + (5 * 60) -- Key berlaku selama 5 menit
+local KeyExpireTime = nil
 local correctKey = "boss" -- Key yang valid
 local keyFile = "AnimeStrikeKey.txt" -- Nama file untuk menyimpan key dan expired time
 
@@ -1765,8 +1765,8 @@ local function createKeyInput()
     local enteredKey = io.read() -- Membaca key yang dimasukkan
     if enteredKey == correctKey then
         KeyValid = true
-        KeyExpireTime = os.time() + (300 * 60) -- Key berlaku selama 24 jam
-        print("Key accepted. Valid for 24 hours.")
+        KeyExpireTime = os.time() + (300 * 60) -- Key berlaku selama 5min
+        print("Key accepted. Valid for 5min.")
         saveKeyConfig() -- Simpan key dan waktu expired
         updateTabVisibility() -- Unhide tab lain
     else
@@ -1788,44 +1788,6 @@ spawn(function()
             createKeyInput() -- Meminta key baru jika expired
         end
         wait(5)
-    end
-end)
--- Inisialisasi status key
-
-
--- Fungsi untuk mengecek apakah key masih valid
-function checkKeyValidity()
-    if os.time() > KeyExpireTime then
-        KeyValid = false
-        OrionLib:MakeNotification({
-            Name = "Key Expired",
-            Content = "Waktu key telah habis. Harap masukkan key baru.",
-            Time = 5
-        })
-    else
-        KeyValid = true
-    end
-end
-
--- Fungsi untuk mendapatkan sisa waktu key
-function getKeyRemainingTime()
-    if KeyExpireTime then
-        local remainingTime = KeyExpireTime - os.time()
-        if remainingTime > 0 then
-            return string.format("%d menit tersisa", math.floor(remainingTime / 60))
-        else
-            return "Key telah kedaluwarsa"
-        end
-    else
-        return "Tidak ada informasi waktu untuk key"
-    end
-end
-
--- Memeriksa validitas key setiap detik
-spawn(function()
-    while true do
-        checkKeyValidity()
-        wait(1)
     end
 end)
 
