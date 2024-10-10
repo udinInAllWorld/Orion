@@ -1713,20 +1713,18 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Inisialisasi variabel untuk status key
+-- Key system terpisah
 local KeyValid = false
 local KeyExpireTime = nil
-local correctKey = "boss" -- Key yang valid
-local keyFile = "AnimeStrikeKey.txt" -- File untuk menyimpan key dan waktu kedaluwarsa
+local correctKey = "boss"
+local keyFile = "AnimeStrikeKey.txt"
 
--- Fungsi untuk memulai waktu key
 local function StartKeyTimer(durationMinutes)
     KeyExpireTime = os.time() + (durationMinutes * 60)
     KeyValid = true
-    saveKeyConfig() -- Simpan key dan waktu kedaluwarsa
+    saveKeyConfig()
 end
 
--- Fungsi untuk menyimpan konfigurasi key
 local function saveKeyConfig()
     local data = {
         key = correctKey,
@@ -1735,7 +1733,6 @@ local function saveKeyConfig()
     writefile(keyFile, game:GetService("HttpService"):JSONEncode(data))
 end
 
--- Fungsi untuk memuat konfigurasi key dari file
 local function loadKeyConfig()
     if isfile(keyFile) then
         local data = readfile(keyFile)
@@ -1751,7 +1748,6 @@ local function loadKeyConfig()
     end
 end
 
--- Fungsi untuk mendapatkan waktu sisa key
 local function GetKeyTimeRemaining()
     if KeyExpireTime then
         local timeLeft = KeyExpireTime - os.time()
@@ -1768,7 +1764,6 @@ local function GetKeyTimeRemaining()
     end
 end
 
--- Fungsi untuk menampilkan status key
 local function GetKeyStatus()
     if KeyValid then
         return "Key aktif. Waktu tersisa: " .. GetKeyTimeRemaining()
@@ -1780,8 +1775,8 @@ end
 -- Muat konfigurasi key saat memulai
 loadKeyConfig()
 
--- Memulai timer key dengan durasi 2 menit
-StartKeyTimer(2) -- Mengatur durasi key menjadi 2 menit
+-- Mulai timer key dengan durasi 2 menit (untuk testing)
+StartKeyTimer(2)
 
 
 -- [Bagian lain dari skrip yang diperlukan]
