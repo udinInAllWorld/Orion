@@ -1713,7 +1713,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 -- [Bagian library Orion dan fungsi lainnya]
 
--- Key system terpisah
+-- Key system script terpisah
 local KeyValid = false
 local KeyExpireTime = nil
 local correctKey = "boss"
@@ -1774,9 +1774,7 @@ end
 
 -- Muat konfigurasi key saat memulai
 loadKeyConfig()
-
--- Mulai timer key dengan durasi 2 menit (untuk testing)
-StartKeyTimer(2)
+StartKeyTimer(2) -- 2 menit untuk testing
 
 
 -- [Bagian lain dari skrip yang diperlukan]
